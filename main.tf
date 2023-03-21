@@ -20,3 +20,17 @@ resource "aws_subnet" "public_subnets" {
     { Name = "${var.env}-${each.value["name"]}" }
   )
 }
+
+## Private Subnets
+resource "aws_subnet" "private_subnets" {
+  vpc_id = aws_vpc.main.id
+
+  for_each          = var.private_subnets
+  cidr_block        = each.value["cidr_block"]
+  availability_zone = each.value["availability_zone"]
+  tags = merge(
+    var.tags,
+    { Name = "${var.env}-${each.value["name"]}" }
+  )
+
+}
