@@ -21,6 +21,18 @@ resource "aws_subnet" "public_subnets" {
   )
 }
 
+
+# Public Route table
+resource "aws_route_table" "public-route-table" {
+  vpc_id = aws_vpc.main.id
+
+  for_each = var.public_subnets
+  tags = merge(
+    var.tags,
+    { Name = "${var.env}-${each.value["name"]}" }
+  )
+}
+
 ## Private Subnets
 resource "aws_subnet" "private_subnets" {
   vpc_id = aws_vpc.main.id
@@ -32,5 +44,15 @@ resource "aws_subnet" "private_subnets" {
     var.tags,
     { Name = "${var.env}-${each.value["name"]}" }
   )
+}
 
+# Private Route table
+resource "aws_route_table" "private-route-table" {
+  vpc_id = aws_vpc.main.id
+
+  for_each = var.private_subnets
+  tags = merge(
+    var.tags,
+    { Name = "${var.env}-${each.value["name"]}" }
+  )
 }
