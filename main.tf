@@ -72,7 +72,12 @@ resource "aws_route_table" "public-route-table" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-
+  
+   route {
+    cidr_block                = data.aws_vpc.default_vpc.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+  } 
+  
   for_each = var.public_subnets
   tags = merge(
     var.tags,
@@ -94,6 +99,7 @@ resource "aws_subnet" "private_subnets" {
   for_each          = var.private_subnets
   cidr_block        = each.value["cidr_block"]
   availability_zone = each.value["availability_zone"]
+  
   tags = merge(
     var.tags,
     { Name = "${var.env}-${each.value["name"]}" }
@@ -109,6 +115,12 @@ resource "aws_route_table" "private-route-table" {
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat-gateways["public-${split("-", each.value["name"])[1]}"].id
+  }
+
+
+  route {
+    cidr_block                = data.aws_vpc.default_vpc.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
   }
 
   tags = merge(
